@@ -1,0 +1,37 @@
+# AWS Configuration
+aws_region  = "us-east-1"
+environment = "production"
+
+# EC2 Instance Configuration
+instance_type = "t3.xlarge" # 4 vCPU, 16GB - runs 5+ runners
+
+# Security Tools (must match image-builder settings for agent registration at boot)
+enable_falcon_sensor = false
+enable_wazuh_agent   = false
+enable_nftables      = true
+
+# Deployment flag
+# Set to true after AMI is built by the image-builder pipeline
+deploy_ec2_instance = false
+
+# After terraform apply, update SSM parameters with actual values:
+#
+# aws ssm put-parameter --name "/bitbucket-runners/account-uuid" \
+#   --value "{your-workspace-uuid}" --type SecureString --overwrite
+#
+# aws ssm put-parameter --name "/bitbucket-runners/runners" \
+#   --type SecureString --overwrite \
+#   --value '[
+#     {"uuid": "{runner-1-uuid}", "oauth_client_id": "id-1", "oauth_client_secret": "secret-1"},
+#     {"uuid": "{runner-2-uuid}", "oauth_client_id": "id-2", "oauth_client_secret": "secret-2"}
+#   ]'
+#
+# If enable_wazuh_agent = true:
+# aws ssm put-parameter --name "/bitbucket-runners/wazuh-manager" \
+#   --value "wazuh.example.com" --type String --overwrite
+# aws ssm put-parameter --name "/bitbucket-runners/wazuh-token" \
+#   --value "your-wazuh-token" --type SecureString --overwrite
+#
+# If enable_falcon_sensor = true:
+# aws ssm put-parameter --name "/bitbucket-runners/falcon-cid" \
+#   --value "your-falcon-cid" --type SecureString --overwrite

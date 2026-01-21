@@ -1,27 +1,3 @@
-# Data source to get the latest AMI built by Image Builder
-# Only queried when deploy_ec2_instance = true
-data "aws_ami" "bitbucket_runner" {
-  count = var.deploy_ec2_instance ? 1 : 0
-
-  most_recent = true
-  owners      = ["self"]
-
-  filter {
-    name   = "name"
-    values = ["bitbucket-runner-*"]
-  }
-
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-
-  filter {
-    name   = "tag:CreatedBy"
-    values = ["EC2ImageBuilder"]
-  }
-}
-
 # User data script with conditional security agent registration
 locals {
   user_data = <<-EOF
@@ -113,8 +89,8 @@ resource "aws_instance" "bitbucket_runner" {
 
   ami                    = data.aws_ami.bitbucket_runner[0].id
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.private[0].id
-  vpc_security_group_ids = [aws_security_group.ec2_instance.id]
+  subnet_id              = data.terraform_remote_state.infrastructure.outputs.private_subnet_ids[0]
+  vpc_security_group_ids = [data.terraform_remote_state.infrastructure.outputs.security_group_id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_instance.name
 
   root_block_device {

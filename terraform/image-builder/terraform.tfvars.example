@@ -1,0 +1,12 @@
+# AWS Configuration
+aws_region  = "us-east-1"
+environment = "production"
+
+# Security Tools (baked into AMI)
+enable_falcon_sensor = false
+enable_wazuh_agent   = false
+enable_nftables      = true
+
+# Falcon Sensor S3 location (required if enable_falcon_sensor = true)
+falcon_sensor_s3_bucket = "my-security-bucket"
+falcon_sensor_s3_key    = "falcon-sensor/falcon-sensor.rpm"

@@ -10,12 +10,6 @@ variable "environment" {
   default     = "production"
 }
 
-variable "vpc_cidr" {
-  description = "VPC CIDR block"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
 variable "instance_type" {
   description = "EC2 instance type - t3.xlarge provides 4 vCPU, 16GB RAM for running 5+ runners"
   type        = string
@@ -23,31 +17,19 @@ variable "instance_type" {
 }
 
 variable "enable_falcon_sensor" {
-  description = "Enable CrowdStrike Falcon sensor installation"
+  description = "Enable CrowdStrike Falcon sensor registration at boot"
   type        = bool
   default     = false
 }
 
-variable "falcon_sensor_s3_bucket" {
-  description = "S3 bucket containing Falcon sensor RPM (required if enable_falcon_sensor=true)"
-  type        = string
-  default     = ""
-}
-
-variable "falcon_sensor_s3_key" {
-  description = "S3 key (path) to Falcon sensor RPM (required if enable_falcon_sensor=true)"
-  type        = string
-  default     = ""
-}
-
 variable "enable_wazuh_agent" {
-  description = "Enable Wazuh agent installation"
+  description = "Enable Wazuh agent registration at boot"
   type        = bool
   default     = false
 }
 
 variable "enable_nftables" {
-  description = "Enable nftables firewall configuration"
+  description = "Enable nftables firewall at boot"
   type        = bool
   default     = true
 }

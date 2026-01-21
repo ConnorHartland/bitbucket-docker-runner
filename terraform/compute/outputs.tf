@@ -1,18 +1,3 @@
-output "vpc_id" {
-  description = "ID of the VPC"
-  value       = aws_vpc.main.id
-}
-
-output "private_subnet_ids" {
-  description = "IDs of the private subnets"
-  value       = aws_subnet.private[*].id
-}
-
-output "public_subnet_ids" {
-  description = "IDs of the public subnets"
-  value       = aws_subnet.public[*].id
-}
-
 output "instance_id" {
   description = "ID of the Bitbucket runner EC2 instance"
   value       = var.deploy_ec2_instance ? aws_instance.bitbucket_runner[0].id : null
@@ -21,11 +6,6 @@ output "instance_id" {
 output "instance_private_ip" {
   description = "Private IP of the Bitbucket runner EC2 instance"
   value       = var.deploy_ec2_instance ? aws_instance.bitbucket_runner[0].private_ip : null
-}
-
-output "image_builder_pipeline_arn" {
-  description = "ARN of the EC2 Image Builder pipeline"
-  value       = aws_imagebuilder_image_pipeline.bitbucket_runner.arn
 }
 
 output "golden_ami_id" {

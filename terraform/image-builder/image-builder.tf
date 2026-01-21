@@ -1,12 +1,5 @@
 # EC2 Image Builder for Bitbucket Runner Golden AMI
 
-data "aws_caller_identity" "current" {}
-
-# Get latest Amazon Linux 2023 AMI
-data "aws_ssm_parameter" "al2023_ami" {
-  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
-}
-
 # Component: Install Docker and docker-compose (always included)
 resource "aws_imagebuilder_component" "install_docker" {
   name        = "bitbucket-runners-install-docker"
@@ -254,8 +247,8 @@ resource "aws_imagebuilder_infrastructure_configuration" "bitbucket_runner" {
   name                          = "bitbucket-runners-infrastructure"
   instance_profile_name         = aws_iam_instance_profile.image_builder.name
   instance_types                = ["t3.medium"]
-  subnet_id                     = aws_subnet.private[0].id
-  security_group_ids            = [aws_security_group.ec2_instance.id]
+  subnet_id                     = data.terraform_remote_state.infrastructure.outputs.private_subnet_ids[0]
+  security_group_ids            = [data.terraform_remote_state.infrastructure.outputs.security_group_id]
   terminate_instance_on_failure = true
 
   tags = {
