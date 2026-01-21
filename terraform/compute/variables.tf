@@ -22,19 +22,7 @@ variable "deploy_ec2_instance" {
   default     = false
 }
 
-# Security agent flags (must match image-builder module)
-variable "enable_crowdstrike" {
-  description = "Enable CrowdStrike Falcon sensor registration at boot"
-  type        = bool
-  default     = false
-}
-
-variable "enable_wazuh" {
-  description = "Enable Wazuh agent registration at boot"
-  type        = bool
-  default     = false
-}
-
+# Optional: Firewall (nftables)
 variable "enable_firewall" {
   description = "Enable nftables firewall at boot"
   type        = bool

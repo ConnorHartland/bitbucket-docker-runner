@@ -61,6 +61,52 @@ resource "aws_imagebuilder_component" "install_cloudwatch_agent" {
 }
 
 # =============================================================================
+# Security Components (always included)
+# =============================================================================
+
+resource "aws_imagebuilder_component" "install_crowdstrike" {
+  name        = "bitbucket-runners-install-crowdstrike"
+  platform    = "Linux"
+  version     = "1.0.0"
+  description = "Install CrowdStrike Falcon sensor from S3"
+
+  data = file("${path.module}/components/install-crowdstrike.yaml")
+
+  tags = {
+    Name        = "bitbucket-runners-install-crowdstrike"
+    Environment = var.environment
+  }
+}
+
+resource "aws_imagebuilder_component" "install_wazuh" {
+  name        = "bitbucket-runners-install-wazuh"
+  platform    = "Linux"
+  version     = "1.0.0"
+  description = "Install Wazuh agent from S3 (registration happens at boot)"
+
+  data = file("${path.module}/components/install-wazuh.yaml")
+
+  tags = {
+    Name        = "bitbucket-runners-install-wazuh"
+    Environment = var.environment
+  }
+}
+
+resource "aws_imagebuilder_component" "install_nessus" {
+  name        = "bitbucket-runners-install-nessus"
+  platform    = "Linux"
+  version     = "1.0.0"
+  description = "Install Nessus agent from S3"
+
+  data = file("${path.module}/components/install-nessus.yaml")
+
+  tags = {
+    Name        = "bitbucket-runners-install-nessus"
+    Environment = var.environment
+  }
+}
+
+# =============================================================================
 # Optional Components (conditionally included)
 # =============================================================================
 
@@ -101,63 +147,6 @@ resource "aws_imagebuilder_component" "firewall_update" {
   }
 }
 
-# CrowdStrike Falcon
-resource "aws_imagebuilder_component" "install_crowdstrike" {
-  count = var.enable_crowdstrike ? 1 : 0
-
-  name        = "bitbucket-runners-install-crowdstrike"
-  platform    = "Linux"
-  version     = "1.0.0"
-  description = "Install CrowdStrike Falcon sensor from S3"
-
-  data = templatefile("${path.module}/components/install-crowdstrike.yaml", {
-    falcon_sensor_bucket = var.falcon_sensor_bucket
-    falcon_sensor_key    = var.falcon_sensor_key
-  })
-
-  tags = {
-    Name        = "bitbucket-runners-install-crowdstrike"
-    Environment = var.environment
-  }
-}
-
-# Wazuh
-resource "aws_imagebuilder_component" "install_wazuh" {
-  count = var.enable_wazuh ? 1 : 0
-
-  name        = "bitbucket-runners-install-wazuh"
-  platform    = "Linux"
-  version     = "1.0.0"
-  description = "Install Wazuh agent (registration happens at boot)"
-
-  data = file("${path.module}/components/install-wazuh.yaml")
-
-  tags = {
-    Name        = "bitbucket-runners-install-wazuh"
-    Environment = var.environment
-  }
-}
-
-# Nessus
-resource "aws_imagebuilder_component" "install_nessus" {
-  count = var.enable_nessus ? 1 : 0
-
-  name        = "bitbucket-runners-install-nessus"
-  platform    = "Linux"
-  version     = "1.0.0"
-  description = "Install Nessus agent from S3"
-
-  data = templatefile("${path.module}/components/install-nessus.yaml", {
-    nessus_agent_bucket = var.nessus_agent_bucket
-    nessus_agent_key    = var.nessus_agent_key
-  })
-
-  tags = {
-    Name        = "bitbucket-runners-install-nessus"
-    Environment = var.environment
-  }
-}
-
 # New Relic
 resource "aws_imagebuilder_component" "install_newrelic" {
   count = var.enable_newrelic ? 1 : 0
@@ -187,12 +176,14 @@ locals {
     [aws_imagebuilder_component.install_docker.arn],
     [aws_imagebuilder_component.install_cloudwatch_agent.arn],
 
+    # Security components (always included)
+    [aws_imagebuilder_component.install_crowdstrike.arn],
+    [aws_imagebuilder_component.install_wazuh.arn],
+    [aws_imagebuilder_component.install_nessus.arn],
+
     # Optional components
     var.enable_nodejs ? [aws_imagebuilder_component.install_nodejs[0].arn] : [],
     var.enable_firewall ? [aws_imagebuilder_component.firewall_update[0].arn] : [],
-    var.enable_crowdstrike ? [aws_imagebuilder_component.install_crowdstrike[0].arn] : [],
-    var.enable_wazuh ? [aws_imagebuilder_component.install_wazuh[0].arn] : [],
-    var.enable_nessus ? [aws_imagebuilder_component.install_nessus[0].arn] : [],
     var.enable_newrelic ? [aws_imagebuilder_component.install_newrelic[0].arn] : []
   )
 }

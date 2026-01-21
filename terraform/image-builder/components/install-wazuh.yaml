@@ -2,26 +2,17 @@ schemaVersion: 1.0
 phases:
   - name: build
     steps:
-      - name: AddWazuhRepo
-        action: ExecuteBash
+      - name: DownloadWazuhAgent
+        action: S3Download
         inputs:
-          commands:
-            - rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH
-            - |
-              cat > /etc/yum.repos.d/wazuh.repo << 'EOF'
-              [wazuh]
-              gpgcheck=1
-              gpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH
-              enabled=1
-              name=EL-$releasever - Wazuh
-              baseurl=https://packages.wazuh.com/4.x/yum/
-              protect=1
-              EOF
+          - source: s3://goldenimage-poc/wazuh-agent.rpm
+            destination: /tmp/wazuh-agent.rpm
 
       - name: InstallWazuhAgent
         action: ExecuteBash
         inputs:
           commands:
-            - dnf install -y wazuh-agent
+            - dnf install -y /tmp/wazuh-agent.rpm
+            - rm -f /tmp/wazuh-agent.rpm
             - systemctl daemon-reload
             - systemctl enable wazuh-agent

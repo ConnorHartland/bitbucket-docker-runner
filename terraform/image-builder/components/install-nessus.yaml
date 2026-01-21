@@ -5,7 +5,7 @@ phases:
       - name: DownloadNessusAgent
         action: S3Download
         inputs:
-          - source: s3://${nessus_agent_bucket}/${nessus_agent_key}
+          - source: s3://goldenimage-poc/nessus_agent.rpm
             destination: /tmp/NessusAgent.rpm
 
       - name: InstallNessusAgent

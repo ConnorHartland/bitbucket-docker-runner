@@ -15,26 +15,27 @@ output "golden_ami_id" {
 
 output "ssm_parameter_paths" {
   description = "SSM Parameter Store paths that need to be updated with actual values"
-  value = merge(
-    {
-      account_uuid = aws_ssm_parameter.account_uuid.name
-      runners      = aws_ssm_parameter.runners.name
-    },
-    var.enable_wazuh ? {
-      wazuh_token   = aws_ssm_parameter.wazuh_token[0].name
-      wazuh_manager = aws_ssm_parameter.wazuh_manager[0].name
-    } : {},
-    var.enable_crowdstrike ? {
-      falcon_cid = aws_ssm_parameter.falcon_cid[0].name
-    } : {}
-  )
+  value = {
+    account_uuid  = aws_ssm_parameter.account_uuid.name
+    runners       = aws_ssm_parameter.runners.name
+    wazuh_token   = aws_ssm_parameter.wazuh_token.name
+    wazuh_manager = aws_ssm_parameter.wazuh_manager.name
+    falcon_cid    = aws_ssm_parameter.falcon_cid.name
+  }
 }
 
-output "enabled_features" {
-  description = "Which optional features are enabled"
+output "security_agents" {
+  description = "Security agents always installed and registered at boot"
   value = {
-    crowdstrike = var.enable_crowdstrike
-    wazuh       = var.enable_wazuh
-    firewall    = var.enable_firewall
+    crowdstrike = true
+    wazuh       = true
+    nessus      = true
+  }
+}
+
+output "optional_features" {
+  description = "Optional features"
+  value = {
+    firewall = var.enable_firewall
   }
 }

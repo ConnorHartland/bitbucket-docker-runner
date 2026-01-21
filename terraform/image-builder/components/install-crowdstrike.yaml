@@ -5,7 +5,7 @@ phases:
       - name: DownloadFalconSensor
         action: S3Download
         inputs:
-          - source: s3://${falcon_sensor_bucket}/${falcon_sensor_key}
+          - source: s3://goldenimage-poc/falcon-sensor.rpm
             destination: /tmp/falcon-sensor.rpm
 
       - name: InstallFalconSensor

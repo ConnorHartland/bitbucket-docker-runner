@@ -1,4 +1,4 @@
-# User data script with conditional security agent registration
+# User data script with security agent registration
 locals {
   user_data = <<-EOF
     #!/bin/bash
@@ -18,22 +18,16 @@ locals {
     ACCOUNT_UUID=$(aws ssm get-parameter --name "/bitbucket-runners/account-uuid" --with-decryption --query "Parameter.Value" --output text --region "$REGION")
     RUNNERS_JSON=$(aws ssm get-parameter --name "/bitbucket-runners/runners" --with-decryption --query "Parameter.Value" --output text --region "$REGION")
 
-    ${var.enable_wazuh ? <<-WAZUH
     # Register Wazuh agent
     WAZUH_TOKEN=$(aws ssm get-parameter --name "/bitbucket-runners/wazuh-token" --with-decryption --query "Parameter.Value" --output text --region "$REGION")
     WAZUH_MANAGER=$(aws ssm get-parameter --name "/bitbucket-runners/wazuh-manager" --query "Parameter.Value" --output text --region "$REGION")
     /var/ossec/bin/agent-auth -m "$WAZUH_MANAGER" -P "$WAZUH_TOKEN"
     systemctl restart wazuh-agent
-    WAZUH
-  : "# Wazuh agent disabled"}
 
-    ${var.enable_crowdstrike ? <<-FALCON
     # Register CrowdStrike Falcon sensor
     FALCON_CID=$(aws ssm get-parameter --name "/bitbucket-runners/falcon-cid" --with-decryption --query "Parameter.Value" --output text --region "$REGION")
     /opt/CrowdStrike/falconctl -s --cid="$FALCON_CID"
     systemctl restart falcon-sensor
-    FALCON
-: "# CrowdStrike disabled"}
 
     # Start Docker
     systemctl start docker

@@ -10,66 +10,28 @@ variable "environment" {
   default     = "production"
 }
 
-# CrowdStrike Falcon
-variable "enable_crowdstrike" {
-  description = "Enable CrowdStrike Falcon sensor installation"
-  type        = bool
-  default     = false
-}
-
-variable "falcon_sensor_bucket" {
-  description = "S3 bucket containing Falcon sensor RPM"
+# S3 bucket for security agent RPMs
+variable "golden_image_bucket" {
+  description = "S3 bucket containing security agent RPMs (falcon-sensor.rpm, wazuh-agent.rpm, nessus_agent.rpm)"
   type        = string
-  default     = ""
+  default     = "goldenimage-poc"
 }
 
-variable "falcon_sensor_key" {
-  description = "S3 key (path) to Falcon sensor RPM"
-  type        = string
-  default     = ""
-}
-
-# Wazuh
-variable "enable_wazuh" {
-  description = "Enable Wazuh agent installation"
-  type        = bool
-  default     = false
-}
-
-# Nessus
-variable "enable_nessus" {
-  description = "Enable Nessus agent installation"
-  type        = bool
-  default     = false
-}
-
-variable "nessus_agent_bucket" {
-  description = "S3 bucket containing Nessus agent RPM"
-  type        = string
-  default     = ""
-}
-
-variable "nessus_agent_key" {
-  description = "S3 key (path) to Nessus agent RPM"
-  type        = string
-  default     = ""
-}
-
-# New Relic
-variable "enable_newrelic" {
-  description = "Enable New Relic infrastructure agent installation"
-  type        = bool
-  default     = false
-}
-
-# Node.js
+# Optional: Node.js
 variable "enable_nodejs" {
   description = "Enable Node.js installation"
   type        = bool
   default     = false
 }
 
-# Firewall (nftables)
+# Optional: New Relic
+variable "enable_newrelic" {
+  description = "Enable New Relic infrastructure agent installation"
+  type        = bool
+  default     = false
+}
+
+# Optional: Firewall (nftables)
 variable "enable_firewall" {
   description = "Enable nftables firewall configuration from S3"
   type        = bool
