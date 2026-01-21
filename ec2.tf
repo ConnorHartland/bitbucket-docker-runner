@@ -70,13 +70,16 @@ locals {
     services:
     COMPOSE
 
-    # Add each runner to docker-compose.yml
+    # Add each runner to docker-compose.yml (each with isolated working directory)
     INDEX=1
     RUNNER_COUNT=$(echo "$RUNNERS_JSON" | jq 'length')
     for i in $(seq 0 $((RUNNER_COUNT - 1))); do
       RUNNER_UUID=$(echo "$RUNNERS_JSON" | jq -r ".[$i].uuid")
       OAUTH_CLIENT_ID=$(echo "$RUNNERS_JSON" | jq -r ".[$i].oauth_client_id")
       OAUTH_CLIENT_SECRET=$(echo "$RUNNERS_JSON" | jq -r ".[$i].oauth_client_secret")
+
+      # Create isolated working directory for this runner
+      mkdir -p /tmp/runner-$${INDEX}
 
       cat >> /opt/bitbucket-runners/docker-compose.yml << RUNNER
       runner-$${INDEX}:
@@ -85,7 +88,7 @@ locals {
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock
           - /var/lib/docker/containers:/var/lib/docker/containers:ro
-          - /tmp:/tmp
+          - /tmp/runner-$${INDEX}:/tmp
         environment:
           - ACCOUNT_UUID=$${ACCOUNT_UUID}
           - RUNNER_UUID=$${RUNNER_UUID}
