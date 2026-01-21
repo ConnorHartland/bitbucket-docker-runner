@@ -6,8 +6,11 @@ output "image_builder_pipeline_arn" {
 output "enabled_features" {
   description = "Which optional features are enabled in the AMI"
   value = {
-    wazuh_agent   = var.enable_wazuh_agent
-    falcon_sensor = var.enable_falcon_sensor
-    nftables      = var.enable_nftables
+    crowdstrike = var.enable_crowdstrike
+    wazuh       = var.enable_wazuh
+    nessus      = var.enable_nessus
+    newrelic    = var.enable_newrelic
+    nodejs      = var.enable_nodejs
+    firewall    = var.enable_firewall
   }
 }

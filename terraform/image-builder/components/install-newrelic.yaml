@@ -1,0 +1,24 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: AddNewRelicRepo
+        action: ExecuteBash
+        inputs:
+          commands:
+            - |
+              cat > /etc/yum.repos.d/newrelic-infra.repo << 'EOF'
+              [newrelic-infra]
+              name=New Relic Infrastructure
+              baseurl=https://download.newrelic.com/infrastructure_agent/linux/yum/amazonlinux/2023/x86_64
+              gpgkey=https://download.newrelic.com/infrastructure_agent/gpg/newrelic-infra.gpg
+              gpgcheck=1
+              repo_gpgcheck=1
+              EOF
+
+      - name: InstallNewRelicAgent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y newrelic-infra
+            - systemctl enable newrelic-infra

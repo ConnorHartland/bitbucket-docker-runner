@@ -16,26 +16,27 @@ variable "instance_type" {
   default     = "t3.xlarge"
 }
 
-variable "enable_falcon_sensor" {
+variable "deploy_ec2_instance" {
+  description = "Deploy the EC2 instance (set to true after AMI is built)"
+  type        = bool
+  default     = false
+}
+
+# Security agent flags (must match image-builder module)
+variable "enable_crowdstrike" {
   description = "Enable CrowdStrike Falcon sensor registration at boot"
   type        = bool
   default     = false
 }
 
-variable "enable_wazuh_agent" {
+variable "enable_wazuh" {
   description = "Enable Wazuh agent registration at boot"
   type        = bool
   default     = false
 }
 
-variable "enable_nftables" {
+variable "enable_firewall" {
   description = "Enable nftables firewall at boot"
-  type        = bool
-  default     = true
-}
-
-variable "deploy_ec2_instance" {
-  description = "Deploy the EC2 instance (set to true after AMI is built)"
   type        = bool
   default     = false
 }

@@ -20,11 +20,11 @@ output "ssm_parameter_paths" {
       account_uuid = aws_ssm_parameter.account_uuid.name
       runners      = aws_ssm_parameter.runners.name
     },
-    var.enable_wazuh_agent ? {
+    var.enable_wazuh ? {
       wazuh_token   = aws_ssm_parameter.wazuh_token[0].name
       wazuh_manager = aws_ssm_parameter.wazuh_manager[0].name
     } : {},
-    var.enable_falcon_sensor ? {
+    var.enable_crowdstrike ? {
       falcon_cid = aws_ssm_parameter.falcon_cid[0].name
     } : {}
   )
@@ -33,8 +33,8 @@ output "ssm_parameter_paths" {
 output "enabled_features" {
   description = "Which optional features are enabled"
   value = {
-    wazuh_agent   = var.enable_wazuh_agent
-    falcon_sensor = var.enable_falcon_sensor
-    nftables      = var.enable_nftables
+    crowdstrike = var.enable_crowdstrike
+    wazuh       = var.enable_wazuh
+    firewall    = var.enable_firewall
   }
 }

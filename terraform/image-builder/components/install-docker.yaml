@@ -1,0 +1,50 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallDocker
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y docker
+            - systemctl enable docker
+            - usermod -aG docker ec2-user
+
+      - name: InstallDockerCompose
+        action: ExecuteBash
+        inputs:
+          commands:
+            - curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            - chmod +x /usr/local/bin/docker-compose
+            - ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+      - name: CreateRunnersDirectory
+        action: ExecuteBash
+        inputs:
+          commands:
+            - mkdir -p /opt/bitbucket-runners
+            - chown ec2-user:ec2-user /opt/bitbucket-runners
+
+      - name: ConfigureDockerDaemon
+        action: ExecuteBash
+        inputs:
+          commands:
+            - mkdir -p /etc/docker
+            - |
+              cat > /etc/docker/daemon.json << 'EOF'
+              {
+                "icc": false,
+                "log-driver": "json-file",
+                "log-opts": {
+                  "max-size": "100m",
+                  "max-file": "5"
+                },
+                "live-restore": true,
+                "userland-proxy": false,
+                "no-new-privileges": true,
+                "default-ulimits": {
+                  "nofile": { "Name": "nofile", "Hard": 65536, "Soft": 65536 },
+                  "nproc": { "Name": "nproc", "Hard": 4096, "Soft": 4096 }
+                }
+              }
+              EOF

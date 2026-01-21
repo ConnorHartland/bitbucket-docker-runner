@@ -1,0 +1,17 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: DownloadFalconSensor
+        action: S3Download
+        inputs:
+          - source: s3://${falcon_sensor_bucket}/${falcon_sensor_key}
+            destination: /tmp/falcon-sensor.rpm
+
+      - name: InstallFalconSensor
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y /tmp/falcon-sensor.rpm
+            - rm -f /tmp/falcon-sensor.rpm
+            - systemctl enable falcon-sensor

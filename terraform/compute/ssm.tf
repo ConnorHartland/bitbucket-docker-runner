@@ -37,7 +37,7 @@ resource "aws_ssm_parameter" "runners" {
 
 # Wazuh parameters (conditional)
 resource "aws_ssm_parameter" "wazuh_token" {
-  count = var.enable_wazuh_agent ? 1 : 0
+  count = var.enable_wazuh ? 1 : 0
 
   name        = "/bitbucket-runners/wazuh-token"
   description = "Wazuh agent registration token"
@@ -56,7 +56,7 @@ resource "aws_ssm_parameter" "wazuh_token" {
 }
 
 resource "aws_ssm_parameter" "wazuh_manager" {
-  count = var.enable_wazuh_agent ? 1 : 0
+  count = var.enable_wazuh ? 1 : 0
 
   name        = "/bitbucket-runners/wazuh-manager"
   description = "Wazuh manager IP or hostname"
@@ -75,7 +75,7 @@ resource "aws_ssm_parameter" "wazuh_manager" {
 
 # Falcon parameter (conditional)
 resource "aws_ssm_parameter" "falcon_cid" {
-  count = var.enable_falcon_sensor ? 1 : 0
+  count = var.enable_crowdstrike ? 1 : 0
 
   name        = "/bitbucket-runners/falcon-cid"
   description = "CrowdStrike Falcon CID"

@@ -1,0 +1,17 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: DownloadNessusAgent
+        action: S3Download
+        inputs:
+          - source: s3://${nessus_agent_bucket}/${nessus_agent_key}
+            destination: /tmp/NessusAgent.rpm
+
+      - name: InstallNessusAgent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y /tmp/NessusAgent.rpm
+            - rm -f /tmp/NessusAgent.rpm
+            - systemctl enable nessusagent

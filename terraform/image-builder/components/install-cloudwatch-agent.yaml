@@ -1,0 +1,84 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallCloudWatchAgent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y amazon-cloudwatch-agent
+
+      - name: ConfigureCloudWatchAgent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - mkdir -p /opt/aws/amazon-cloudwatch-agent/etc
+            - |
+              cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'EOF'
+              {
+                "agent": {
+                  "metrics_collection_interval": 60,
+                  "run_as_user": "root"
+                },
+                "logs": {
+                  "logs_collected": {
+                    "files": {
+                      "collect_list": [
+                        {
+                          "file_path": "/var/log/messages",
+                          "log_group_name": "/bitbucket-runners/ec2",
+                          "log_stream_name": "{instance_id}/messages",
+                          "retention_in_days": 30
+                        },
+                        {
+                          "file_path": "/var/log/secure",
+                          "log_group_name": "/bitbucket-runners/security",
+                          "log_stream_name": "{instance_id}/secure",
+                          "retention_in_days": 90
+                        },
+                        {
+                          "file_path": "/var/log/docker.log",
+                          "log_group_name": "/bitbucket-runners/docker",
+                          "log_stream_name": "{instance_id}/docker",
+                          "retention_in_days": 30
+                        }
+                      ]
+                    }
+                  }
+                },
+                "metrics": {
+                  "namespace": "BitbucketRunners",
+                  "metrics_collected": {
+                    "cpu": {
+                      "measurement": ["cpu_usage_idle", "cpu_usage_user", "cpu_usage_system"],
+                      "metrics_collection_interval": 60,
+                      "resources": ["*"],
+                      "totalcpu": true
+                    },
+                    "disk": {
+                      "measurement": ["disk_used_percent", "disk_free", "disk_used"],
+                      "metrics_collection_interval": 60,
+                      "resources": ["/"]
+                    },
+                    "mem": {
+                      "measurement": ["mem_used_percent", "mem_available", "mem_used"],
+                      "metrics_collection_interval": 60
+                    },
+                    "net": {
+                      "measurement": ["net_bytes_recv", "net_bytes_sent"],
+                      "metrics_collection_interval": 60,
+                      "resources": ["eth0"]
+                    }
+                  },
+                  "append_dimensions": {
+                    "InstanceId": "${aws:InstanceId}"
+                  }
+                }
+              }
+              EOF
+
+      - name: EnableCloudWatchAgent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - systemctl enable amazon-cloudwatch-agent

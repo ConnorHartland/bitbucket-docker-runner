@@ -18,7 +18,7 @@ locals {
     ACCOUNT_UUID=$(aws ssm get-parameter --name "/bitbucket-runners/account-uuid" --with-decryption --query "Parameter.Value" --output text --region "$REGION")
     RUNNERS_JSON=$(aws ssm get-parameter --name "/bitbucket-runners/runners" --with-decryption --query "Parameter.Value" --output text --region "$REGION")
 
-    ${var.enable_wazuh_agent ? <<-WAZUH
+    ${var.enable_wazuh ? <<-WAZUH
     # Register Wazuh agent
     WAZUH_TOKEN=$(aws ssm get-parameter --name "/bitbucket-runners/wazuh-token" --with-decryption --query "Parameter.Value" --output text --region "$REGION")
     WAZUH_MANAGER=$(aws ssm get-parameter --name "/bitbucket-runners/wazuh-manager" --query "Parameter.Value" --output text --region "$REGION")
@@ -27,13 +27,13 @@ locals {
     WAZUH
   : "# Wazuh agent disabled"}
 
-    ${var.enable_falcon_sensor ? <<-FALCON
-    # Register Falcon sensor
+    ${var.enable_crowdstrike ? <<-FALCON
+    # Register CrowdStrike Falcon sensor
     FALCON_CID=$(aws ssm get-parameter --name "/bitbucket-runners/falcon-cid" --with-decryption --query "Parameter.Value" --output text --region "$REGION")
     /opt/CrowdStrike/falconctl -s --cid="$FALCON_CID"
     systemctl restart falcon-sensor
     FALCON
-: "# Falcon sensor disabled"}
+: "# CrowdStrike disabled"}
 
     # Start Docker
     systemctl start docker
@@ -41,7 +41,7 @@ locals {
     # Start CloudWatch agent
     systemctl start amazon-cloudwatch-agent
 
-    ${var.enable_nftables ? "# Start nftables\nsystemctl start nftables" : "# nftables disabled"}
+    ${var.enable_firewall ? "# Start nftables\nsystemctl start nftables" : "# Firewall disabled"}
 
     # Generate docker-compose.yml header
     cat > /opt/bitbucket-runners/docker-compose.yml << 'COMPOSE'

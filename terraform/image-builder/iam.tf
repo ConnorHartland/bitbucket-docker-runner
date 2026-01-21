@@ -33,9 +33,27 @@ resource "aws_iam_role_policy_attachment" "image_builder_ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# Custom policy for S3 read access to Falcon sensor bucket (conditional)
+# Build list of S3 buckets that need access
+locals {
+  s3_buckets = compact([
+    var.enable_crowdstrike && var.falcon_sensor_bucket != "" ? var.falcon_sensor_bucket : "",
+    var.enable_nessus && var.nessus_agent_bucket != "" ? var.nessus_agent_bucket : "",
+    var.enable_firewall && var.firewall_config_bucket != "" ? var.firewall_config_bucket : ""
+  ])
+
+  s3_resources = flatten([
+    for bucket in local.s3_buckets : [
+      "arn:aws:s3:::${bucket}",
+      "arn:aws:s3:::${bucket}/*"
+    ]
+  ])
+
+  needs_s3_access = length(local.s3_buckets) > 0
+}
+
+# Custom policy for S3 read access (conditional - only if any S3 buckets are needed)
 resource "aws_iam_role_policy" "image_builder_s3" {
-  count = var.enable_falcon_sensor ? 1 : 0
+  count = local.needs_s3_access ? 1 : 0
 
   name = "bitbucket-runners-image-builder-s3"
   role = aws_iam_role.image_builder.id
@@ -49,10 +67,7 @@ resource "aws_iam_role_policy" "image_builder_s3" {
           "s3:GetObject",
           "s3:ListBucket"
         ]
-        Resource = [
-          "arn:aws:s3:::${var.falcon_sensor_s3_bucket}",
-          "arn:aws:s3:::${var.falcon_sensor_s3_bucket}/*"
-        ]
+        Resource = local.s3_resources
       }
     ]
   })

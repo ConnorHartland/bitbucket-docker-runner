@@ -1,0 +1,9 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallNodeJS
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y nodejs npm

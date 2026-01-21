@@ -1,0 +1,9 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallLinuxTools
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y jq curl wget unzip tar gzip git vim htop net-tools bind-utils

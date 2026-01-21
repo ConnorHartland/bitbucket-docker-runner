@@ -1,0 +1,22 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallNftables
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y nftables
+
+      - name: DownloadFirewallConfig
+        action: ExecuteBash
+        inputs:
+          commands:
+            - aws s3 cp s3://${firewall_config_bucket}/${firewall_config_key} /etc/nftables.conf
+            - chmod 600 /etc/nftables.conf
+
+      - name: EnableNftables
+        action: ExecuteBash
+        inputs:
+          commands:
+            - systemctl enable nftables
