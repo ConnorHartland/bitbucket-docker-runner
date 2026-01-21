@@ -48,6 +48,65 @@ resource "aws_iam_role_policy" "ec2_ssm_parameters" {
   })
 }
 
+# CloudWatch Logs and Metrics policy for EC2 instance
+resource "aws_iam_role_policy" "ec2_cloudwatch" {
+  name = "bitbucket-runners-cloudwatch"
+  role = aws_iam_role.ec2_instance.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "CloudWatchLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = [
+          "arn:aws:logs:${var.aws_region}:*:log-group:/bitbucket-runners/*",
+          "arn:aws:logs:${var.aws_region}:*:log-group:/bitbucket-runners/*:log-stream:*"
+        ]
+      },
+      {
+        Sid    = "CloudWatchMetrics"
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:PutMetricData"
+        ]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "cloudwatch:namespace" = "BitbucketRunners"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# KMS permissions for decrypting SSM parameters and EBS volumes
+resource "aws_iam_role_policy" "ec2_kms" {
+  name = "bitbucket-runners-kms"
+  role = aws_iam_role.ec2_instance.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = data.terraform_remote_state.infrastructure.outputs.kms_key_arn
+      }
+    ]
+  })
+}
+
 # EC2 Instance Profile
 resource "aws_iam_instance_profile" "ec2_instance" {
   name = "bitbucket-runners-ec2-instance-profile"

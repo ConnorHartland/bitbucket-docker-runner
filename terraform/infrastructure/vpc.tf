@@ -123,3 +123,73 @@ resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private[count.index].id
 }
+
+# VPC Flow Logs for network traffic auditing
+resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+  name              = "/bitbucket-runners/vpc-flow-logs"
+  retention_in_days = 30
+  kms_key_id        = aws_kms_key.bitbucket_runner.arn
+
+  tags = {
+    Name        = "bitbucket-runners-vpc-flow-logs"
+    Environment = var.environment
+  }
+}
+
+resource "aws_iam_role" "vpc_flow_logs" {
+  name = "bitbucket-runners-vpc-flow-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = {
+    Name        = "bitbucket-runners-vpc-flow-logs-role"
+    Environment = var.environment
+  }
+}
+
+resource "aws_iam_role_policy" "vpc_flow_logs" {
+  name = "bitbucket-runners-vpc-flow-logs-policy"
+  role = aws_iam_role.vpc_flow_logs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_flow_log" "main" {
+  vpc_id                   = aws_vpc.main.id
+  traffic_type             = "ALL"
+  log_destination_type     = "cloud-watch-logs"
+  log_destination          = aws_cloudwatch_log_group.vpc_flow_logs.arn
+  iam_role_arn             = aws_iam_role.vpc_flow_logs.arn
+  max_aggregation_interval = 60
+
+  tags = {
+    Name        = "bitbucket-runners-vpc-flow-log"
+    Environment = var.environment
+  }
+}

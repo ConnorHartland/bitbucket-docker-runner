@@ -38,13 +38,16 @@ locals {
     # Start Docker
     systemctl start docker
 
+    # Start CloudWatch agent
+    systemctl start amazon-cloudwatch-agent
+
     ${var.enable_nftables ? "# Start nftables\nsystemctl start nftables" : "# nftables disabled"}
 
     # Generate docker-compose.yml header
     cat > /opt/bitbucket-runners/docker-compose.yml << 'COMPOSE'
-    version: '3.8'
-    services:
-    COMPOSE
+version: '3.8'
+services:
+COMPOSE
 
     # Add each runner to docker-compose.yml (each with isolated working directory)
     INDEX=1
@@ -58,23 +61,54 @@ locals {
       mkdir -p /tmp/runner-$${INDEX}
 
       cat >> /opt/bitbucket-runners/docker-compose.yml << RUNNER
-      runner-$${INDEX}:
-        image: docker-public.packages.atlassian.com/sox/atlassian/bitbucket-pipelines-runner
-        restart: unless-stopped
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
-          - /var/lib/docker/containers:/var/lib/docker/containers:ro
-          - /tmp/runner-$${INDEX}:/tmp
-        environment:
-          - ACCOUNT_UUID=$${ACCOUNT_UUID}
-          - RUNNER_UUID=$${RUNNER_UUID}
-          - OAUTH_CLIENT_ID=$${OAUTH_CLIENT_ID}
-          - OAUTH_CLIENT_SECRET=$${OAUTH_CLIENT_SECRET}
-          - RUNTIME_PREREQUISITES_ENABLED=true
-          - WORKING_DIRECTORY=/tmp
-    RUNNER
+  runner-$${INDEX}:
+    image: docker-public.packages.atlassian.com/sox/atlassian/bitbucket-pipelines-runner
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /tmp/runner-$${INDEX}:/tmp
+    environment:
+      - ACCOUNT_UUID=$${ACCOUNT_UUID}
+      - RUNNER_UUID=$${RUNNER_UUID}
+      - OAUTH_CLIENT_ID=$${OAUTH_CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=$${OAUTH_CLIENT_SECRET}
+      - RUNTIME_PREREQUISITES_ENABLED=true
+      - WORKING_DIRECTORY=/tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - FSETID
+      - KILL
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+      - SYS_CHROOT
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    pids_limit: 200
+RUNNER
       INDEX=$((INDEX + 1))
     done
+
+    # Secure docker-compose.yml permissions (contains OAuth secrets)
+    chmod 600 /opt/bitbucket-runners/docker-compose.yml
 
     # Start runners
     cd /opt/bitbucket-runners
@@ -97,8 +131,20 @@ resource "aws_instance" "bitbucket_runner" {
     volume_size           = 50
     volume_type           = "gp3"
     encrypted             = true
+    kms_key_id            = data.terraform_remote_state.infrastructure.outputs.kms_key_arn
     delete_on_termination = true
   }
+
+  # IMDSv2 enforcement with hop_limit=1 to prevent container SSRF
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+    instance_metadata_tags      = "disabled"
+  }
+
+  # Enable detailed CloudWatch monitoring
+  monitoring = true
 
   user_data = base64encode(local.user_data)
 
