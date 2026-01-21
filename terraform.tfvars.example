@@ -1,0 +1,20 @@
+# AWS Configuration
+aws_region  = "us-east-1"
+environment = "production"
+
+# VPC Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# Bitbucket Configuration
+# Get these values from Bitbucket Workspace Settings > Workspace runners
+# Note: UUIDs should include the curly braces, e.g., {xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}
+bitbucket_account_uuid = "{your-workspace-uuid}"
+bitbucket_runner_uuid  = "{your-runner-uuid}"
+
+# Runner Labels (comma-separated)
+runner_labels = "self.hosted,linux"
+
+# Scaling Configuration
+desired_count = 5
+min_count     = 5
+max_count     = 10
