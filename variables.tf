@@ -16,36 +16,44 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "bitbucket_account_uuid" {
-  description = "Workspace UUID from Bitbucket (including curly braces)"
+variable "instance_type" {
+  description = "EC2 instance type - t3.xlarge provides 4 vCPU, 16GB RAM for running 5+ runners"
   type        = string
+  default     = "t3.xlarge"
 }
 
-variable "bitbucket_runner_uuid" {
-  description = "Runner UUID from Bitbucket registration (including curly braces)"
+variable "enable_falcon_sensor" {
+  description = "Enable CrowdStrike Falcon sensor installation"
+  type        = bool
+  default     = false
+}
+
+variable "falcon_sensor_s3_bucket" {
+  description = "S3 bucket containing Falcon sensor RPM (required if enable_falcon_sensor=true)"
   type        = string
+  default     = ""
 }
 
-variable "runner_labels" {
-  description = "Comma-separated runner labels"
+variable "falcon_sensor_s3_key" {
+  description = "S3 key (path) to Falcon sensor RPM (required if enable_falcon_sensor=true)"
   type        = string
-  default     = "self.hosted,linux"
+  default     = ""
 }
 
-variable "desired_count" {
-  description = "Desired number of runners"
-  type        = number
-  default     = 5
+variable "enable_wazuh_agent" {
+  description = "Enable Wazuh agent installation"
+  type        = bool
+  default     = false
 }
 
-variable "min_count" {
-  description = "Minimum number of runners"
-  type        = number
-  default     = 5
+variable "enable_nftables" {
+  description = "Enable nftables firewall configuration"
+  type        = bool
+  default     = true
 }
 
-variable "max_count" {
-  description = "Maximum number of runners"
-  type        = number
-  default     = 10
+variable "deploy_ec2_instance" {
+  description = "Deploy the EC2 instance (set to true after AMI is built)"
+  type        = bool
+  default     = false
 }

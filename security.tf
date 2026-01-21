@@ -1,28 +1,23 @@
-resource "aws_security_group" "ecs_tasks" {
-  name        = "bitbucket-runners-ecs-tasks-sg"
-  description = "Security group for Bitbucket runner ECS tasks"
+# Security group for EC2 instance running Bitbucket runners
+resource "aws_security_group" "ec2_instance" {
+  name        = "bitbucket-runners-ec2-instance-sg"
+  description = "Security group for Bitbucket runner EC2 instance"
   vpc_id      = aws_vpc.main.id
 
-  # HTTPS egress for Bitbucket API, ECR, S3, and other AWS services
+  # All egress traffic (Docker Hub, package repos, Bitbucket API, AWS services)
   egress {
-    description = "HTTPS outbound"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
+    description = "All outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # HTTP egress for package downloads
-  egress {
-    description = "HTTP outbound for package downloads"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # No ingress rules - instance runs in private subnet with no inbound access
+  # Add SSH ingress from bastion if needed
 
   tags = {
-    Name        = "bitbucket-runners-ecs-tasks-sg"
+    Name        = "bitbucket-runners-ec2-instance-sg"
     Environment = var.environment
   }
 }

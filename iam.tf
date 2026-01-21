@@ -1,6 +1,6 @@
-# ECS Task Execution Role
-resource "aws_iam_role" "ecs_task_execution" {
-  name = "bitbucket-runners-task-execution-role"
+# EC2 Instance Role for Bitbucket Runner Instance
+resource "aws_iam_role" "ec2_instance" {
+  name = "bitbucket-runners-ec2-instance-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -9,26 +9,28 @@ resource "aws_iam_role" "ecs_task_execution" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "ecs-tasks.amazonaws.com"
+          Service = "ec2.amazonaws.com"
         }
       }
     ]
   })
 
   tags = {
-    Name        = "bitbucket-runners-task-execution-role"
+    Name        = "bitbucket-runners-ec2-instance-role"
     Environment = var.environment
   }
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
-  role       = aws_iam_role.ecs_task_execution.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+# SSM Managed Instance Core for SSM agent and Run Command
+resource "aws_iam_role_policy_attachment" "ec2_ssm_core" {
+  role       = aws_iam_role.ec2_instance.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
-  name = "bitbucket-runners-secrets-access"
-  role = aws_iam_role.ecs_task_execution.id
+# Custom policy for SSM Parameter Store read access
+resource "aws_iam_role_policy" "ec2_ssm_parameters" {
+  name = "bitbucket-runners-ssm-parameters"
+  role = aws_iam_role.ec2_instance.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -36,19 +38,30 @@ resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
       {
         Effect = "Allow"
         Action = [
-          "secretsmanager:GetSecretValue"
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath"
         ]
-        Resource = [
-          aws_secretsmanager_secret.bitbucket_oauth.arn
-        ]
+        Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/bitbucket-runners/*"
       }
     ]
   })
 }
 
-# ECS Task Role (for the running container)
-resource "aws_iam_role" "ecs_task" {
-  name = "bitbucket-runners-task-role"
+# EC2 Instance Profile
+resource "aws_iam_instance_profile" "ec2_instance" {
+  name = "bitbucket-runners-ec2-instance-profile"
+  role = aws_iam_role.ec2_instance.name
+
+  tags = {
+    Name        = "bitbucket-runners-ec2-instance-profile"
+    Environment = var.environment
+  }
+}
+
+# Image Builder Role
+resource "aws_iam_role" "image_builder" {
+  name = "bitbucket-runners-image-builder-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -57,52 +70,36 @@ resource "aws_iam_role" "ecs_task" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "ecs-tasks.amazonaws.com"
+          Service = "ec2.amazonaws.com"
         }
       }
     ]
   })
 
   tags = {
-    Name        = "bitbucket-runners-task-role"
+    Name        = "bitbucket-runners-image-builder-role"
     Environment = var.environment
   }
 }
 
-resource "aws_iam_role_policy" "ecs_task_ecr" {
-  name = "bitbucket-runners-ecr-access"
-  role = aws_iam_role.ecs_task.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ecr:GetAuthorizationToken"
-        ]
-        Resource = "*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:PutImage",
-          "ecr:InitiateLayerUpload",
-          "ecr:UploadLayerPart",
-          "ecr:CompleteLayerUpload"
-        ]
-        Resource = "arn:aws:ecr:${var.aws_region}:*:repository/*"
-      }
-    ]
-  })
+# EC2 Instance Profile for Image Builder managed policy
+resource "aws_iam_role_policy_attachment" "image_builder_ec2" {
+  role       = aws_iam_role.image_builder.name
+  policy_arn = "arn:aws:iam::aws:policy/EC2InstanceProfileForImageBuilder"
 }
 
-resource "aws_iam_role_policy" "ecs_task_s3" {
-  name = "bitbucket-runners-s3-access"
-  role = aws_iam_role.ecs_task.id
+# Image Builder needs SSM for running components
+resource "aws_iam_role_policy_attachment" "image_builder_ssm" {
+  role       = aws_iam_role.image_builder.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# Custom policy for S3 read access to Falcon sensor bucket (conditional)
+resource "aws_iam_role_policy" "image_builder_s3" {
+  count = var.enable_falcon_sensor ? 1 : 0
+
+  name = "bitbucket-runners-image-builder-s3"
+  role = aws_iam_role.image_builder.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -111,33 +108,24 @@ resource "aws_iam_role_policy" "ecs_task_s3" {
         Effect = "Allow"
         Action = [
           "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket",
-          "s3:DeleteObject"
+          "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::*"
+          "arn:aws:s3:::${var.falcon_sensor_s3_bucket}",
+          "arn:aws:s3:::${var.falcon_sensor_s3_bucket}/*"
         ]
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy" "ecs_task_logs" {
-  name = "bitbucket-runners-logs-access"
-  role = aws_iam_role.ecs_task.id
+# Image Builder Instance Profile
+resource "aws_iam_instance_profile" "image_builder" {
+  name = "bitbucket-runners-image-builder-profile"
+  role = aws_iam_role.image_builder.name
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Resource = "${aws_cloudwatch_log_group.ecs.arn}:*"
-      }
-    ]
-  })
+  tags = {
+    Name        = "bitbucket-runners-image-builder-profile"
+    Environment = var.environment
+  }
 }
