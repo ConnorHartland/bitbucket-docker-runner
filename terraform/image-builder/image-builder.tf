@@ -194,7 +194,7 @@ locals {
 
 resource "aws_imagebuilder_image_recipe" "bitbucket_runner" {
   name         = "bitbucket-runners-recipe"
-  parent_image = data.aws_ssm_parameter.al2023_ami.value
+  parent_image = data.aws_ami.cis_al2023_l2.id
   version      = "1.0.0"
 
   block_device_mapping {

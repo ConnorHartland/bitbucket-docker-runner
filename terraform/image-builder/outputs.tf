@@ -20,3 +20,11 @@ output "security_agents" {
     nessus      = true
   }
 }
+
+output "base_ami" {
+  description = "CIS Level 2 Hardened Amazon Linux 2023 base AMI"
+  value = {
+    id   = data.aws_ami.cis_al2023_l2.id
+    name = data.aws_ami.cis_al2023_l2.name
+  }
+}
