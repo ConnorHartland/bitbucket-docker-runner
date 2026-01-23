@@ -10,6 +10,13 @@ variable "environment" {
   default     = "production"
 }
 
+# Shared Services VPC
+variable "vpc_name" {
+  description = "Name tag of the shared services VPC to use"
+  type        = string
+  default     = "ffc-use1-shared-services-shared-01"
+}
+
 variable "instance_type" {
   description = "EC2 instance type - t3.xlarge provides 4 vCPU, 16GB RAM for running 5+ runners"
   type        = string

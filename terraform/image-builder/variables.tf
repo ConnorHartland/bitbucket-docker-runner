@@ -10,6 +10,13 @@ variable "environment" {
   default     = "production"
 }
 
+# Shared Services VPC
+variable "vpc_name" {
+  description = "Name tag of the shared services VPC to use"
+  type        = string
+  default     = "ffc-use1-shared-services-shared-01"
+}
+
 # S3 bucket for security agent RPMs
 variable "golden_image_bucket" {
   description = "S3 bucket containing security agent RPMs (falcon-sensor.rpm, wazuh-agent.rpm, nessus_agent.rpm)"

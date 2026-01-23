@@ -229,8 +229,8 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_image" {
   name                          = "golden-image-infrastructure"
   instance_profile_name         = aws_iam_instance_profile.image_builder.name
   instance_types                = ["t3.medium"]
-  subnet_id                     = data.terraform_remote_state.infrastructure.outputs.private_subnet_ids[0]
-  security_group_ids            = [data.terraform_remote_state.infrastructure.outputs.security_group_id]
+  subnet_id                     = data.aws_subnets.private.ids[0]
+  security_group_ids            = [aws_security_group.image_builder.id]
   terminate_instance_on_failure = true
 
   tags = {

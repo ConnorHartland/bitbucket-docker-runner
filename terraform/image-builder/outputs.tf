@@ -29,3 +29,23 @@ output "base_ami" {
     name = data.aws_ami.cis_al2023_l2.name
   }
 }
+
+output "kms_key_arn" {
+  description = "ARN of the KMS key for encryption"
+  value       = aws_kms_key.golden_image.arn
+}
+
+output "kms_key_id" {
+  description = "ID of the KMS key for encryption"
+  value       = aws_kms_key.golden_image.key_id
+}
+
+output "vpc_id" {
+  description = "ID of the shared services VPC"
+  value       = data.aws_vpc.shared_services.id
+}
+
+output "private_subnet_ids" {
+  description = "IDs of the private subnets"
+  value       = data.aws_subnets.private.ids
+}

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(terraform init:*)",
+      "Bash(git push)",
+      "Bash(terraform validate:*)",
+      "Bash(terraform fmt:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUse CIS Level 2 Hardened AL2023 as base AMI\n\nSwitch from standard Amazon Linux 2023 to CIS Level 2 Hardened\nAL2023 AMI from AWS Marketplace for enhanced security baseline.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

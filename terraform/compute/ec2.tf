@@ -117,15 +117,15 @@ resource "aws_instance" "bitbucket_runner" {
 
   ami                    = data.aws_ami.golden_image[0].id
   instance_type          = var.instance_type
-  subnet_id              = data.terraform_remote_state.infrastructure.outputs.private_subnet_ids[0]
-  vpc_security_group_ids = [data.terraform_remote_state.infrastructure.outputs.security_group_id]
+  subnet_id              = data.aws_subnets.private.ids[0]
+  vpc_security_group_ids = [aws_security_group.ec2_instance.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_instance.name
 
   root_block_device {
     volume_size           = 50
     volume_type           = "gp3"
     encrypted             = true
-    kms_key_id            = data.terraform_remote_state.infrastructure.outputs.kms_key_arn
+    kms_key_id            = data.terraform_remote_state.image_builder.outputs.kms_key_arn
     delete_on_termination = true
   }
 

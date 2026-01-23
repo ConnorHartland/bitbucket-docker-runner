@@ -1,10 +1,31 @@
-# Cross-stack reference to infrastructure outputs
-data "terraform_remote_state" "infrastructure" {
+# Cross-stack reference to image-builder outputs (for KMS key)
+data "terraform_remote_state" "image_builder" {
   backend = "s3"
   config = {
     bucket = "bitbucket-runner-terraform-state"
-    key    = "infrastructure/terraform.tfstate"
+    key    = "image-builder/terraform.tfstate"
     region = "us-east-1"
+  }
+}
+
+# Shared Services VPC lookup
+data "aws_vpc" "shared_services" {
+  filter {
+    name   = "tag:Name"
+    values = [var.vpc_name]
+  }
+}
+
+# Private subnets lookup (Name tag contains 'private')
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.shared_services.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["*private*", "*Private*"]
   }
 }
 

@@ -101,7 +101,7 @@ resource "aws_iam_role_policy" "ec2_kms" {
           "kms:Decrypt",
           "kms:GenerateDataKey"
         ]
-        Resource = data.terraform_remote_state.infrastructure.outputs.kms_key_arn
+        Resource = data.terraform_remote_state.image_builder.outputs.kms_key_arn
       }
     ]
   })
