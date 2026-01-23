@@ -10,7 +10,7 @@ resource "aws_imagebuilder_component" "system_update" {
   version     = "1.0.0"
   description = "Update system packages"
 
-  data = file("${path.module}/components/system-update.yaml")
+  data = file("./components/system-update.yaml")
 
   tags = {
     Name        = "golden-image-system-update"
@@ -24,7 +24,7 @@ resource "aws_imagebuilder_component" "install_linuxtools" {
   version     = "1.0.0"
   description = "Install common Linux tools and utilities"
 
-  data = file("${path.module}/components/install-linuxtools.yaml")
+  data = file("./components/install-linuxtools.yaml")
 
   tags = {
     Name        = "golden-image-install-linuxtools"
@@ -38,7 +38,7 @@ resource "aws_imagebuilder_component" "install_cloudwatch_agent" {
   version     = "1.0.0"
   description = "Install and configure CloudWatch agent for monitoring and logging"
 
-  data = file("${path.module}/components/install-cloudwatch-agent.yaml")
+  data = file("./components/install-cloudwatch-agent.yaml")
 
   tags = {
     Name        = "golden-image-install-cloudwatch-agent"
@@ -56,7 +56,7 @@ resource "aws_imagebuilder_component" "install_crowdstrike" {
   version     = "1.0.0"
   description = "Install CrowdStrike Falcon sensor from S3"
 
-  data = file("${path.module}/components/install-crowdstrike.yaml")
+  data = file("./components/install-crowdstrike.yaml")
 
   tags = {
     Name        = "golden-image-install-crowdstrike"
@@ -70,7 +70,7 @@ resource "aws_imagebuilder_component" "install_wazuh" {
   version     = "1.0.0"
   description = "Install Wazuh agent from S3 (registration happens at boot)"
 
-  data = file("${path.module}/components/install-wazuh.yaml")
+  data = file("./components/install-wazuh.yaml")
 
   tags = {
     Name        = "golden-image-install-wazuh"
@@ -84,7 +84,7 @@ resource "aws_imagebuilder_component" "install_nessus" {
   version     = "1.0.0"
   description = "Install Nessus agent from S3"
 
-  data = file("${path.module}/components/install-nessus.yaml")
+  data = file("./components/install-nessus.yaml")
 
   tags = {
     Name        = "golden-image-install-nessus"
@@ -99,7 +99,7 @@ resource "aws_imagebuilder_component" "firewall_update" {
   version     = "1.0.0"
   description = "Install nftables and download configuration from S3"
 
-  data = templatefile("${path.module}/components/firewall-update.yaml", {
+  data = templatefile("./components/firewall-update.yaml", {
     firewall_config_bucket = var.firewall_config_bucket
     firewall_config_key    = var.firewall_config_key
   })
@@ -123,7 +123,7 @@ resource "aws_imagebuilder_component" "install_docker" {
   version     = "1.0.0"
   description = "Install Docker, docker-compose, and configure daemon security"
 
-  data = file("${path.module}/components/install-docker.yaml")
+  data = file("./components/install-docker.yaml")
 
   tags = {
     Name        = "golden-image-install-docker"
@@ -140,7 +140,7 @@ resource "aws_imagebuilder_component" "install_nodejs" {
   version     = "1.0.0"
   description = "Install Node.js and npm"
 
-  data = file("${path.module}/components/install-nodejs.yaml")
+  data = file("./components/install-nodejs.yaml")
 
   tags = {
     Name        = "golden-image-install-nodejs"
@@ -157,7 +157,7 @@ resource "aws_imagebuilder_component" "install_newrelic" {
   version     = "1.0.0"
   description = "Install New Relic infrastructure agent"
 
-  data = file("${path.module}/components/install-newrelic.yaml")
+  data = file("./components/install-newrelic.yaml")
 
   tags = {
     Name        = "golden-image-install-newrelic"
