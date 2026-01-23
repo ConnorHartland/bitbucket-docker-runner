@@ -1,32 +1,20 @@
-# Cross-stack reference to image-builder outputs (for KMS key)
-data "terraform_remote_state" "image_builder" {
+# Cross-stack reference to infrastructure outputs (VPC, subnets, security group, KMS)
+data "terraform_remote_state" "infrastructure" {
   backend = "s3"
   config = {
     bucket = "bitbucket-runner-terraform-state"
-    key    = "image-builder/terraform.tfstate"
+    key    = "shared-services/bitbucket-runner/infrastructure/terraform.tfstate"
     region = "us-east-1"
   }
 }
 
-# Shared Services VPC lookup
-data "aws_vpc" "shared_services" {
-  filter {
-    name   = "tag:Name"
-    values = [var.vpc_name]
-  }
-}
-
-# Private subnets lookup (Name tag contains 'private')
-data "aws_subnets" "private" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.shared_services.id]
-  }
-
-  filter {
-    name   = "tag:Name"
-    values = ["*private*", "*Private*"]
-  }
+locals {
+  vpc_id             = data.terraform_remote_state.infrastructure.outputs.vpc_id
+  vpc_cidr           = data.terraform_remote_state.infrastructure.outputs.vpc_cidr
+  private_subnet_ids = data.terraform_remote_state.infrastructure.outputs.private_subnet_ids
+  security_group_id  = data.terraform_remote_state.infrastructure.outputs.security_group_id
+  kms_key_arn        = data.terraform_remote_state.infrastructure.outputs.kms_key_arn
+  kms_key_id         = data.terraform_remote_state.infrastructure.outputs.kms_key_id
 }
 
 # Data source to get the latest AMI built by Image Builder

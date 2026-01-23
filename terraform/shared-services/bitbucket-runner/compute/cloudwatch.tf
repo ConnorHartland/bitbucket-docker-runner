@@ -4,7 +4,7 @@
 resource "aws_cloudwatch_log_group" "ec2" {
   name              = "/bitbucket-runners/ec2"
   retention_in_days = 30
-  kms_key_id        = data.terraform_remote_state.image_builder.outputs.kms_key_arn
+  kms_key_id        = local.kms_key_arn
 
   tags = {
     Name        = "bitbucket-runners-ec2-logs"
@@ -15,7 +15,7 @@ resource "aws_cloudwatch_log_group" "ec2" {
 resource "aws_cloudwatch_log_group" "docker" {
   name              = "/bitbucket-runners/docker"
   retention_in_days = 30
-  kms_key_id        = data.terraform_remote_state.image_builder.outputs.kms_key_arn
+  kms_key_id        = local.kms_key_arn
 
   tags = {
     Name        = "bitbucket-runners-docker-logs"
@@ -26,7 +26,7 @@ resource "aws_cloudwatch_log_group" "docker" {
 resource "aws_cloudwatch_log_group" "security" {
   name              = "/bitbucket-runners/security"
   retention_in_days = 90
-  kms_key_id        = data.terraform_remote_state.image_builder.outputs.kms_key_arn
+  kms_key_id        = local.kms_key_arn
 
   tags = {
     Name        = "bitbucket-runners-security-logs"

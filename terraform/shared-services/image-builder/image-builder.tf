@@ -199,9 +199,10 @@ locals {
 # =============================================================================
 
 resource "aws_imagebuilder_image_recipe" "golden_image" {
-  name         = "golden-image-${var.image_name}-recipe"
-  parent_image = data.aws_ami.cis_al2023_l2.id
-  version      = "1.0.0"
+  name              = "golden-image-${var.image_name}-recipe"
+  parent_image      = data.aws_ami.cis_al2023_l2.id
+  version           = "1.0.0"
+  working_directory = "/var/tmp"
 
   block_device_mapping {
     device_name = "/dev/xvda"
