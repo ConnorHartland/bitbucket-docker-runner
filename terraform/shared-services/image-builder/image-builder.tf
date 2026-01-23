@@ -56,7 +56,9 @@ resource "aws_imagebuilder_component" "install_crowdstrike" {
   version     = "1.0.0"
   description = "Install CrowdStrike Falcon sensor from S3"
 
-  data = file("./components/install-crowdstrike.yaml")
+  data = templatefile("./components/install-crowdstrike.yaml", {
+    golden_image_bucket = var.golden_image_bucket
+  })
 
   tags = {
     Name        = "golden-image-install-crowdstrike"
@@ -70,7 +72,9 @@ resource "aws_imagebuilder_component" "install_wazuh" {
   version     = "1.0.0"
   description = "Install Wazuh agent from S3 (registration happens at boot)"
 
-  data = file("./components/install-wazuh.yaml")
+  data = templatefile("./components/install-wazuh.yaml", {
+    golden_image_bucket = var.golden_image_bucket
+  })
 
   tags = {
     Name        = "golden-image-install-wazuh"
@@ -84,7 +88,9 @@ resource "aws_imagebuilder_component" "install_nessus" {
   version     = "1.0.0"
   description = "Install Nessus agent from S3"
 
-  data = file("./components/install-nessus.yaml")
+  data = templatefile("./components/install-nessus.yaml", {
+    golden_image_bucket = var.golden_image_bucket
+  })
 
   tags = {
     Name        = "golden-image-install-nessus"
@@ -100,8 +106,7 @@ resource "aws_imagebuilder_component" "firewall_update" {
   description = "Install nftables and download configuration from S3"
 
   data = templatefile("./components/firewall-update.yaml", {
-    firewall_config_bucket = var.firewall_config_bucket
-    firewall_config_key    = var.firewall_config_key
+    golden_image_bucket = var.golden_image_bucket
   })
 
   tags = {

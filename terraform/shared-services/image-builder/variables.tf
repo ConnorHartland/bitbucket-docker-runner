@@ -21,21 +21,12 @@ variable "vpc_id" {
   type        = string
 }
 
-# S3 bucket for security agent RPMs
+# S3 bucket for golden image assets
+# Expected structure:
+#   al2023/rpm/     - Security agent RPMs (falcon-sensor.rpm, wazuh-agent.rpm, nessus_agent.rpm)
+#   al2023/scripts/ - Scripts and configs (nftables.conf, UpdateNFTables.sh)
 variable "golden_image_bucket" {
-  description = "S3 bucket containing security agent RPMs (falcon-sensor.rpm, wazuh-agent.rpm, nessus_agent.rpm)"
-  type        = string
-  default     = "goldenimage-poc"
-}
-
-# Firewall configuration (required - firewall is always included)
-variable "firewall_config_bucket" {
-  description = "S3 bucket containing nftables configuration"
-  type        = string
-}
-
-variable "firewall_config_key" {
-  description = "S3 key (path) to nftables configuration file"
+  description = "S3 bucket containing golden image assets (RPMs and scripts)"
   type        = string
 }
 

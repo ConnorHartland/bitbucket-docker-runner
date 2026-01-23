@@ -12,8 +12,21 @@ phases:
         action: ExecuteBash
         inputs:
           commands:
-            - aws s3 cp s3://${firewall_config_bucket}/${firewall_config_key} /etc/nftables.conf
+            - aws s3 cp s3://${golden_image_bucket}/al2023/scripts/nftables.conf /etc/nftables.conf
             - chmod 600 /etc/nftables.conf
+
+      - name: DownloadUpdateScript
+        action: ExecuteBash
+        inputs:
+          commands:
+            - aws s3 cp s3://${golden_image_bucket}/al2023/scripts/UpdateNFTables.sh /usr/local/bin/UpdateNFTables.sh
+            - chmod 755 /usr/local/bin/UpdateNFTables.sh
+
+      - name: RunUpdateScript
+        action: ExecuteBash
+        inputs:
+          commands:
+            - /usr/local/bin/UpdateNFTables.sh
 
       - name: EnableNftables
         action: ExecuteBash

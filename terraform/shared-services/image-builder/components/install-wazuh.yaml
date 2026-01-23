@@ -5,7 +5,7 @@ phases:
       - name: DownloadWazuhAgent
         action: S3Download
         inputs:
-          - source: s3://goldenimage-poc/wazuh-agent.rpm
+          - source: s3://${golden_image_bucket}/al2023/rpm/wazuh-agent.rpm
             destination: /tmp/wazuh-agent.rpm
 
       - name: InstallWazuhAgent
