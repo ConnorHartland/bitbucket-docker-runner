@@ -4,6 +4,11 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "image_name" {
+  description = "Feature name for AMI (e.g., node22, docker)"
+  type        = string
+}
+
 variable "environment" {
   description = "Environment name"
   type        = string

@@ -194,7 +194,7 @@ locals {
 # =============================================================================
 
 resource "aws_imagebuilder_image_recipe" "golden_image" {
-  name         = "golden-image-recipe"
+  name         = "golden-image-${var.image_name}-recipe"
   parent_image = data.aws_ami.cis_al2023_l2.id
   version      = "1.0.0"
 
@@ -216,7 +216,7 @@ resource "aws_imagebuilder_image_recipe" "golden_image" {
   }
 
   tags = {
-    Name        = "golden-image-recipe"
+    Name        = "golden-image-${var.image_name}-recipe"
     Environment = var.environment
   }
 }
@@ -244,16 +244,17 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_image" {
 # =============================================================================
 
 resource "aws_imagebuilder_distribution_configuration" "golden_image" {
-  name = "golden-image-distribution"
+  name = "golden-image-${var.image_name}-distribution"
 
   distribution {
     region = var.aws_region
 
     ami_distribution_configuration {
-      name = "golden-image-{{ imagebuilder:buildDate }}"
+      name = "CIS_L2_AL2023_${var.image_name}_Golden_Image-{{ imagebuilder:buildDate }}"
 
       ami_tags = {
-        Name        = "golden-image-ami"
+        Name        = "CIS_L2_AL2023_${var.image_name}_Golden_Image"
+        ImageType   = var.image_name
         Environment = var.environment
         CreatedBy   = "EC2ImageBuilder"
       }
@@ -261,7 +262,7 @@ resource "aws_imagebuilder_distribution_configuration" "golden_image" {
   }
 
   tags = {
-    Name        = "golden-image-distribution"
+    Name        = "golden-image-${var.image_name}-distribution"
     Environment = var.environment
   }
 }
@@ -271,7 +272,7 @@ resource "aws_imagebuilder_distribution_configuration" "golden_image" {
 # =============================================================================
 
 resource "aws_imagebuilder_image_pipeline" "golden_image" {
-  name                             = "golden-image-pipeline"
+  name                             = "golden-image-${var.image_name}-pipeline"
   image_recipe_arn                 = aws_imagebuilder_image_recipe.golden_image.arn
   infrastructure_configuration_arn = aws_imagebuilder_infrastructure_configuration.golden_image.arn
   distribution_configuration_arn   = aws_imagebuilder_distribution_configuration.golden_image.arn
@@ -280,7 +281,7 @@ resource "aws_imagebuilder_image_pipeline" "golden_image" {
   # To build: aws imagebuilder start-image-pipeline-execution --image-pipeline-arn <arn>
 
   tags = {
-    Name        = "golden-image-pipeline"
+    Name        = "golden-image-${var.image_name}-pipeline"
     Environment = var.environment
   }
 }
