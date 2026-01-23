@@ -1,0 +1,50 @@
+schemaVersion: 1.0
+description: Fix CIS L2 hardening to allow cloud-init script execution
+phases:
+  - name: build
+    steps:
+      - name: CreateRemountService
+        action: ExecuteBash
+        inputs:
+          commands:
+            - |
+              # Create systemd service to remount /tmp and /var/tmp with exec before cloud-init
+              cat > /etc/systemd/system/remount-tmp-exec.service << 'SERVICE'
+              [Unit]
+              Description=Remount /tmp and /var/tmp with exec for cloud-init
+              DefaultDependencies=no
+              Before=cloud-init-local.service cloud-init.service
+              After=local-fs.target
+
+              [Service]
+              Type=oneshot
+              ExecStart=/usr/bin/mount -o remount,exec /tmp
+              ExecStart=/usr/bin/mount -o remount,exec /var/tmp
+              RemainAfterExit=yes
+
+              [Install]
+              WantedBy=multi-user.target
+              SERVICE
+
+      - name: EnableRemountService
+        action: ExecuteBash
+        inputs:
+          commands:
+            - systemctl daemon-reload
+            - systemctl enable remount-tmp-exec.service
+
+      - name: ConfigureSELinuxForCloudInit
+        action: ExecuteBash
+        inputs:
+          commands:
+            - |
+              # Allow cloud-init to execute scripts (if SELinux is enforcing)
+              if command -v setsebool &> /dev/null; then
+                # These may or may not exist depending on the SELinux policy
+                setsebool -P nis_enabled on 2>/dev/null || true
+              fi
+
+              # Ensure cloud-init directories have correct SELinux context
+              if command -v restorecon &> /dev/null; then
+                restorecon -R /var/lib/cloud/ 2>/dev/null || true
+              fi

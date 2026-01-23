@@ -18,6 +18,20 @@ resource "aws_imagebuilder_component" "system_update" {
   }
 }
 
+resource "aws_imagebuilder_component" "cis_cloudinit_fix" {
+  name        = "golden-image-cis-cloudinit-fix"
+  platform    = "Linux"
+  version     = "1.0.0"
+  description = "Fix CIS L2 hardening to allow cloud-init script execution"
+
+  data = file("./components/cis-cloudinit-fix.yaml")
+
+  tags = {
+    Name        = "golden-image-cis-cloudinit-fix"
+    Environment = var.environment
+  }
+}
+
 resource "aws_imagebuilder_component" "install_linuxtools" {
   name        = "golden-image-install-linuxtools"
   platform    = "Linux"
@@ -178,6 +192,7 @@ locals {
   component_arns = concat(
     # Core components (always included, in order)
     [aws_imagebuilder_component.system_update.arn],
+    [aws_imagebuilder_component.cis_cloudinit_fix.arn],
     [aws_imagebuilder_component.install_linuxtools.arn],
     [aws_imagebuilder_component.install_cloudwatch_agent.arn],
 
