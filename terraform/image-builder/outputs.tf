@@ -1,14 +1,14 @@
 output "image_builder_pipeline_arn" {
   description = "ARN of the EC2 Image Builder pipeline"
-  value       = aws_imagebuilder_image_pipeline.bitbucket_runner.arn
+  value       = aws_imagebuilder_image_pipeline.golden_image.arn
 }
 
 output "enabled_features" {
   description = "Which optional features are enabled in the AMI"
   value = {
+    docker   = var.enable_docker
     nodejs   = var.enable_nodejs
     newrelic = var.enable_newrelic
-    firewall = var.enable_firewall
   }
 }
 
@@ -18,6 +18,7 @@ output "security_agents" {
     crowdstrike = true
     wazuh       = true
     nessus      = true
+    firewall    = true
   }
 }
 

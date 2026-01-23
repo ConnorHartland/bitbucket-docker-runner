@@ -1,11 +1,11 @@
-# EC2 Image Builder for Bitbucket Runner Golden AMI
+# EC2 Image Builder for Golden Image AMI
 
 # =============================================================================
 # Core Components (always included)
 # =============================================================================
 
 resource "aws_imagebuilder_component" "system_update" {
-  name        = "bitbucket-runners-system-update"
+  name        = "golden-image-system-update"
   platform    = "Linux"
   version     = "1.0.0"
   description = "Update system packages"
@@ -13,13 +13,13 @@ resource "aws_imagebuilder_component" "system_update" {
   data = file("${path.module}/components/system-update.yaml")
 
   tags = {
-    Name        = "bitbucket-runners-system-update"
+    Name        = "golden-image-system-update"
     Environment = var.environment
   }
 }
 
 resource "aws_imagebuilder_component" "install_linuxtools" {
-  name        = "bitbucket-runners-install-linuxtools"
+  name        = "golden-image-install-linuxtools"
   platform    = "Linux"
   version     = "1.0.0"
   description = "Install common Linux tools and utilities"
@@ -27,27 +27,13 @@ resource "aws_imagebuilder_component" "install_linuxtools" {
   data = file("${path.module}/components/install-linuxtools.yaml")
 
   tags = {
-    Name        = "bitbucket-runners-install-linuxtools"
-    Environment = var.environment
-  }
-}
-
-resource "aws_imagebuilder_component" "install_docker" {
-  name        = "bitbucket-runners-install-docker"
-  platform    = "Linux"
-  version     = "1.0.0"
-  description = "Install Docker, docker-compose, and configure daemon security"
-
-  data = file("${path.module}/components/install-docker.yaml")
-
-  tags = {
-    Name        = "bitbucket-runners-install-docker"
+    Name        = "golden-image-install-linuxtools"
     Environment = var.environment
   }
 }
 
 resource "aws_imagebuilder_component" "install_cloudwatch_agent" {
-  name        = "bitbucket-runners-install-cloudwatch-agent"
+  name        = "golden-image-install-cloudwatch-agent"
   platform    = "Linux"
   version     = "1.0.0"
   description = "Install and configure CloudWatch agent for monitoring and logging"
@@ -55,7 +41,7 @@ resource "aws_imagebuilder_component" "install_cloudwatch_agent" {
   data = file("${path.module}/components/install-cloudwatch-agent.yaml")
 
   tags = {
-    Name        = "bitbucket-runners-install-cloudwatch-agent"
+    Name        = "golden-image-install-cloudwatch-agent"
     Environment = var.environment
   }
 }
@@ -65,7 +51,7 @@ resource "aws_imagebuilder_component" "install_cloudwatch_agent" {
 # =============================================================================
 
 resource "aws_imagebuilder_component" "install_crowdstrike" {
-  name        = "bitbucket-runners-install-crowdstrike"
+  name        = "golden-image-install-crowdstrike"
   platform    = "Linux"
   version     = "1.0.0"
   description = "Install CrowdStrike Falcon sensor from S3"
@@ -73,13 +59,13 @@ resource "aws_imagebuilder_component" "install_crowdstrike" {
   data = file("${path.module}/components/install-crowdstrike.yaml")
 
   tags = {
-    Name        = "bitbucket-runners-install-crowdstrike"
+    Name        = "golden-image-install-crowdstrike"
     Environment = var.environment
   }
 }
 
 resource "aws_imagebuilder_component" "install_wazuh" {
-  name        = "bitbucket-runners-install-wazuh"
+  name        = "golden-image-install-wazuh"
   platform    = "Linux"
   version     = "1.0.0"
   description = "Install Wazuh agent from S3 (registration happens at boot)"
@@ -87,13 +73,13 @@ resource "aws_imagebuilder_component" "install_wazuh" {
   data = file("${path.module}/components/install-wazuh.yaml")
 
   tags = {
-    Name        = "bitbucket-runners-install-wazuh"
+    Name        = "golden-image-install-wazuh"
     Environment = var.environment
   }
 }
 
 resource "aws_imagebuilder_component" "install_nessus" {
-  name        = "bitbucket-runners-install-nessus"
+  name        = "golden-image-install-nessus"
   platform    = "Linux"
   version     = "1.0.0"
   description = "Install Nessus agent from S3"
@@ -101,37 +87,14 @@ resource "aws_imagebuilder_component" "install_nessus" {
   data = file("${path.module}/components/install-nessus.yaml")
 
   tags = {
-    Name        = "bitbucket-runners-install-nessus"
+    Name        = "golden-image-install-nessus"
     Environment = var.environment
   }
 }
 
-# =============================================================================
-# Optional Components (conditionally included)
-# =============================================================================
-
-# Node.js
-resource "aws_imagebuilder_component" "install_nodejs" {
-  count = var.enable_nodejs ? 1 : 0
-
-  name        = "bitbucket-runners-install-nodejs"
-  platform    = "Linux"
-  version     = "1.0.0"
-  description = "Install Node.js and npm"
-
-  data = file("${path.module}/components/install-nodejs.yaml")
-
-  tags = {
-    Name        = "bitbucket-runners-install-nodejs"
-    Environment = var.environment
-  }
-}
-
-# Firewall (nftables from S3)
+# Firewall (nftables from S3) - always included
 resource "aws_imagebuilder_component" "firewall_update" {
-  count = var.enable_firewall ? 1 : 0
-
-  name        = "bitbucket-runners-firewall-update"
+  name        = "golden-image-firewall-update"
   platform    = "Linux"
   version     = "1.0.0"
   description = "Install nftables and download configuration from S3"
@@ -142,7 +105,45 @@ resource "aws_imagebuilder_component" "firewall_update" {
   })
 
   tags = {
-    Name        = "bitbucket-runners-firewall-update"
+    Name        = "golden-image-firewall-update"
+    Environment = var.environment
+  }
+}
+
+# =============================================================================
+# Optional Components (conditionally included)
+# =============================================================================
+
+# Docker
+resource "aws_imagebuilder_component" "install_docker" {
+  count = var.enable_docker ? 1 : 0
+
+  name        = "golden-image-install-docker"
+  platform    = "Linux"
+  version     = "1.0.0"
+  description = "Install Docker, docker-compose, and configure daemon security"
+
+  data = file("${path.module}/components/install-docker.yaml")
+
+  tags = {
+    Name        = "golden-image-install-docker"
+    Environment = var.environment
+  }
+}
+
+# Node.js
+resource "aws_imagebuilder_component" "install_nodejs" {
+  count = var.enable_nodejs ? 1 : 0
+
+  name        = "golden-image-install-nodejs"
+  platform    = "Linux"
+  version     = "1.0.0"
+  description = "Install Node.js and npm"
+
+  data = file("${path.module}/components/install-nodejs.yaml")
+
+  tags = {
+    Name        = "golden-image-install-nodejs"
     Environment = var.environment
   }
 }
@@ -151,7 +152,7 @@ resource "aws_imagebuilder_component" "firewall_update" {
 resource "aws_imagebuilder_component" "install_newrelic" {
   count = var.enable_newrelic ? 1 : 0
 
-  name        = "bitbucket-runners-install-newrelic"
+  name        = "golden-image-install-newrelic"
   platform    = "Linux"
   version     = "1.0.0"
   description = "Install New Relic infrastructure agent"
@@ -159,7 +160,7 @@ resource "aws_imagebuilder_component" "install_newrelic" {
   data = file("${path.module}/components/install-newrelic.yaml")
 
   tags = {
-    Name        = "bitbucket-runners-install-newrelic"
+    Name        = "golden-image-install-newrelic"
     Environment = var.environment
   }
 }
@@ -173,17 +174,17 @@ locals {
     # Core components (always included, in order)
     [aws_imagebuilder_component.system_update.arn],
     [aws_imagebuilder_component.install_linuxtools.arn],
-    [aws_imagebuilder_component.install_docker.arn],
     [aws_imagebuilder_component.install_cloudwatch_agent.arn],
 
     # Security components (always included)
     [aws_imagebuilder_component.install_crowdstrike.arn],
     [aws_imagebuilder_component.install_wazuh.arn],
     [aws_imagebuilder_component.install_nessus.arn],
+    [aws_imagebuilder_component.firewall_update.arn],
 
     # Optional components
+    var.enable_docker ? [aws_imagebuilder_component.install_docker[0].arn] : [],
     var.enable_nodejs ? [aws_imagebuilder_component.install_nodejs[0].arn] : [],
-    var.enable_firewall ? [aws_imagebuilder_component.firewall_update[0].arn] : [],
     var.enable_newrelic ? [aws_imagebuilder_component.install_newrelic[0].arn] : []
   )
 }
@@ -192,8 +193,8 @@ locals {
 # Image Recipe
 # =============================================================================
 
-resource "aws_imagebuilder_image_recipe" "bitbucket_runner" {
-  name         = "bitbucket-runners-recipe"
+resource "aws_imagebuilder_image_recipe" "golden_image" {
+  name         = "golden-image-recipe"
   parent_image = data.aws_ami.cis_al2023_l2.id
   version      = "1.0.0"
 
@@ -215,7 +216,7 @@ resource "aws_imagebuilder_image_recipe" "bitbucket_runner" {
   }
 
   tags = {
-    Name        = "bitbucket-runners-recipe"
+    Name        = "golden-image-recipe"
     Environment = var.environment
   }
 }
@@ -224,8 +225,8 @@ resource "aws_imagebuilder_image_recipe" "bitbucket_runner" {
 # Infrastructure Configuration
 # =============================================================================
 
-resource "aws_imagebuilder_infrastructure_configuration" "bitbucket_runner" {
-  name                          = "bitbucket-runners-infrastructure"
+resource "aws_imagebuilder_infrastructure_configuration" "golden_image" {
+  name                          = "golden-image-infrastructure"
   instance_profile_name         = aws_iam_instance_profile.image_builder.name
   instance_types                = ["t3.medium"]
   subnet_id                     = data.terraform_remote_state.infrastructure.outputs.private_subnet_ids[0]
@@ -233,7 +234,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "bitbucket_runner" {
   terminate_instance_on_failure = true
 
   tags = {
-    Name        = "bitbucket-runners-infrastructure"
+    Name        = "golden-image-infrastructure"
     Environment = var.environment
   }
 }
@@ -242,17 +243,17 @@ resource "aws_imagebuilder_infrastructure_configuration" "bitbucket_runner" {
 # Distribution Configuration
 # =============================================================================
 
-resource "aws_imagebuilder_distribution_configuration" "bitbucket_runner" {
-  name = "bitbucket-runners-distribution"
+resource "aws_imagebuilder_distribution_configuration" "golden_image" {
+  name = "golden-image-distribution"
 
   distribution {
     region = var.aws_region
 
     ami_distribution_configuration {
-      name = "bitbucket-runner-{{ imagebuilder:buildDate }}"
+      name = "golden-image-{{ imagebuilder:buildDate }}"
 
       ami_tags = {
-        Name        = "bitbucket-runner-ami"
+        Name        = "golden-image-ami"
         Environment = var.environment
         CreatedBy   = "EC2ImageBuilder"
       }
@@ -260,7 +261,7 @@ resource "aws_imagebuilder_distribution_configuration" "bitbucket_runner" {
   }
 
   tags = {
-    Name        = "bitbucket-runners-distribution"
+    Name        = "golden-image-distribution"
     Environment = var.environment
   }
 }
@@ -269,17 +270,17 @@ resource "aws_imagebuilder_distribution_configuration" "bitbucket_runner" {
 # Image Pipeline
 # =============================================================================
 
-resource "aws_imagebuilder_image_pipeline" "bitbucket_runner" {
-  name                             = "bitbucket-runners-pipeline"
-  image_recipe_arn                 = aws_imagebuilder_image_recipe.bitbucket_runner.arn
-  infrastructure_configuration_arn = aws_imagebuilder_infrastructure_configuration.bitbucket_runner.arn
-  distribution_configuration_arn   = aws_imagebuilder_distribution_configuration.bitbucket_runner.arn
+resource "aws_imagebuilder_image_pipeline" "golden_image" {
+  name                             = "golden-image-pipeline"
+  image_recipe_arn                 = aws_imagebuilder_image_recipe.golden_image.arn
+  infrastructure_configuration_arn = aws_imagebuilder_infrastructure_configuration.golden_image.arn
+  distribution_configuration_arn   = aws_imagebuilder_distribution_configuration.golden_image.arn
 
   # Manual trigger - no schedule
   # To build: aws imagebuilder start-image-pipeline-execution --image-pipeline-arn <arn>
 
   tags = {
-    Name        = "bitbucket-runners-pipeline"
+    Name        = "golden-image-pipeline"
     Environment = var.environment
   }
 }

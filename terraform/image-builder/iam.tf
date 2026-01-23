@@ -1,6 +1,6 @@
 # Image Builder Role
 resource "aws_iam_role" "image_builder" {
-  name = "bitbucket-runners-image-builder-role"
+  name = "golden-image-builder-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -16,7 +16,7 @@ resource "aws_iam_role" "image_builder" {
   })
 
   tags = {
-    Name        = "bitbucket-runners-image-builder-role"
+    Name        = "golden-image-builder-role"
     Environment = var.environment
   }
 }
@@ -35,7 +35,7 @@ resource "aws_iam_role_policy_attachment" "image_builder_ssm" {
 
 # S3 read access for golden image bucket (security agent RPMs)
 resource "aws_iam_role_policy" "image_builder_s3" {
-  name = "bitbucket-runners-image-builder-s3"
+  name = "golden-image-builder-s3"
   role = aws_iam_role.image_builder.id
 
   policy = jsonencode({
@@ -58,11 +58,11 @@ resource "aws_iam_role_policy" "image_builder_s3" {
 
 # Image Builder Instance Profile
 resource "aws_iam_instance_profile" "image_builder" {
-  name = "bitbucket-runners-image-builder-profile"
+  name = "golden-image-builder-profile"
   role = aws_iam_role.image_builder.name
 
   tags = {
-    Name        = "bitbucket-runners-image-builder-profile"
+    Name        = "golden-image-builder-profile"
     Environment = var.environment
   }
 }

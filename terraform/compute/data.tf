@@ -11,7 +11,7 @@ data "terraform_remote_state" "infrastructure" {
 # Data source to get the latest AMI built by Image Builder
 # Only queried when deploy_ec2_instance = true
 # Uses tag-based lookup (not direct state dependency on image-builder stack)
-data "aws_ami" "bitbucket_runner" {
+data "aws_ami" "golden_image" {
   count = var.deploy_ec2_instance ? 1 : 0
 
   most_recent = true
@@ -19,7 +19,7 @@ data "aws_ami" "bitbucket_runner" {
 
   filter {
     name   = "name"
-    values = ["bitbucket-runner-*"]
+    values = ["golden-image-*"]
   }
 
   filter {

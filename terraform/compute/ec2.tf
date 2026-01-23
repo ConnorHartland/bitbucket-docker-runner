@@ -115,7 +115,7 @@ RUNNER
 resource "aws_instance" "bitbucket_runner" {
   count = var.deploy_ec2_instance ? 1 : 0
 
-  ami                    = data.aws_ami.bitbucket_runner[0].id
+  ami                    = data.aws_ami.golden_image[0].id
   instance_type          = var.instance_type
   subnet_id              = data.terraform_remote_state.infrastructure.outputs.private_subnet_ids[0]
   vpc_security_group_ids = [data.terraform_remote_state.infrastructure.outputs.security_group_id]

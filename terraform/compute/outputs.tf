@@ -10,7 +10,7 @@ output "instance_private_ip" {
 
 output "golden_ami_id" {
   description = "ID of the Golden AMI used by the instance"
-  value       = var.deploy_ec2_instance ? data.aws_ami.bitbucket_runner[0].id : null
+  value       = var.deploy_ec2_instance ? data.aws_ami.golden_image[0].id : null
 }
 
 output "ssm_parameter_paths" {

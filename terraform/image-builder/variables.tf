@@ -17,6 +17,24 @@ variable "golden_image_bucket" {
   default     = "goldenimage-poc"
 }
 
+# Firewall configuration (required - firewall is always included)
+variable "firewall_config_bucket" {
+  description = "S3 bucket containing nftables configuration"
+  type        = string
+}
+
+variable "firewall_config_key" {
+  description = "S3 key (path) to nftables configuration file"
+  type        = string
+}
+
+# Optional: Docker
+variable "enable_docker" {
+  description = "Enable Docker and docker-compose installation"
+  type        = bool
+  default     = false
+}
+
 # Optional: Node.js
 variable "enable_nodejs" {
   description = "Enable Node.js installation"
@@ -29,23 +47,4 @@ variable "enable_newrelic" {
   description = "Enable New Relic infrastructure agent installation"
   type        = bool
   default     = false
-}
-
-# Optional: Firewall (nftables)
-variable "enable_firewall" {
-  description = "Enable nftables firewall configuration from S3"
-  type        = bool
-  default     = false
-}
-
-variable "firewall_config_bucket" {
-  description = "S3 bucket containing nftables configuration"
-  type        = string
-  default     = ""
-}
-
-variable "firewall_config_key" {
-  description = "S3 key (path) to nftables configuration file"
-  type        = string
-  default     = ""
 }
