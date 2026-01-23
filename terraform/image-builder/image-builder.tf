@@ -226,7 +226,7 @@ resource "aws_imagebuilder_image_recipe" "golden_image" {
 # =============================================================================
 
 resource "aws_imagebuilder_infrastructure_configuration" "golden_image" {
-  name                          = "golden-image-infrastructure"
+  name                          = "golden-image-${var.image_name}-infrastructure"
   instance_profile_name         = aws_iam_instance_profile.image_builder.name
   instance_types                = ["t3.medium"]
   subnet_id                     = data.aws_subnets.private.ids[0]
@@ -234,7 +234,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_image" {
   terminate_instance_on_failure = true
 
   tags = {
-    Name        = "golden-image-infrastructure"
+    Name        = "golden-image-${var.image_name}-infrastructure"
     Environment = var.environment
   }
 }
