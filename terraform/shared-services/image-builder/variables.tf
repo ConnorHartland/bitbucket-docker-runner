@@ -15,11 +15,10 @@ variable "environment" {
   default     = "production"
 }
 
-# Shared Services VPC
-variable "vpc_name" {
-  description = "Name tag of the shared services VPC to use"
+# VPC Configuration
+variable "vpc_id" {
+  description = "VPC ID where Image Builder will run"
   type        = string
-  default     = "ffc-use1-shared-services-shared-01"
 }
 
 # S3 bucket for security agent RPMs

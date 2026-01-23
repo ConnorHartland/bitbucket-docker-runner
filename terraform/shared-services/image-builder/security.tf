@@ -2,7 +2,7 @@
 resource "aws_security_group" "image_builder" {
   name        = "golden-image-builder-sg"
   description = "Security group for EC2 Image Builder instances"
-  vpc_id      = data.aws_vpc.shared_services.id
+  vpc_id      = data.aws_vpc.selected.id
 
   # HTTPS - S3 access for security agent RPMs, SSM, AWS APIs
   egress {
@@ -28,7 +28,7 @@ resource "aws_security_group" "image_builder" {
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
-    cidr_blocks = [data.aws_vpc.shared_services.cidr_block]
+    cidr_blocks = [data.aws_vpc.selected.cidr_block]
   }
 
   egress {
@@ -36,7 +36,7 @@ resource "aws_security_group" "image_builder" {
     from_port   = 53
     to_port     = 53
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.shared_services.cidr_block]
+    cidr_blocks = [data.aws_vpc.selected.cidr_block]
   }
 
   # No ingress rules - build instances don't need inbound access

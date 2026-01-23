@@ -1,16 +1,13 @@
-# Shared Services VPC lookup
-data "aws_vpc" "shared_services" {
-  filter {
-    name   = "tag:Name"
-    values = [var.vpc_name]
-  }
+# VPC lookup for CIDR block
+data "aws_vpc" "selected" {
+  id = var.vpc_id
 }
 
 # Private subnets lookup (Name tag contains 'private')
 data "aws_subnets" "private" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.shared_services.id]
+    values = [var.vpc_id]
   }
 
   filter {

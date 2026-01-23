@@ -41,8 +41,8 @@ output "kms_key_id" {
 }
 
 output "vpc_id" {
-  description = "ID of the shared services VPC"
-  value       = data.aws_vpc.shared_services.id
+  description = "ID of the VPC used for image building"
+  value       = var.vpc_id
 }
 
 output "private_subnet_ids" {
